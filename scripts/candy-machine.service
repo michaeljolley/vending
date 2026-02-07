@@ -1,0 +1,15 @@
+[Unit]
+Description=Valentine's Candy Machine
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/juke
+ExecStart=/home/pi/juke/venv/bin/python /home/pi/juke/backend/main.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

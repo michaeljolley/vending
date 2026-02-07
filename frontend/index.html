@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Valentine's Vending Machine</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        h1 { font-family: 'Bubblegum Sans', cursive; }
+        body { font-family: 'Nunito', sans-serif; }
+    </style>
+</head>
+<body>
+    <!-- Floating hearts background -->
+    <div class="hearts-bg" id="hearts-bg"></div>
+    
+    <!-- Corner decorations -->
+    <div class="corner-decoration top-left">💕</div>
+    <div class="corner-decoration top-right">💝</div>
+    <div class="corner-decoration bottom-left">💗</div>
+    <div class="corner-decoration bottom-right">💕</div>
+
+    <div class="container">
+        <header>
+            <h1>💘 Valentine's Vending Machine 💘</h1>
+            <div class="credits-display">
+                <span class="credits-label">Credits</span>
+                <span id="credits" class="credits-value">0</span>
+            </div>
+        </header>
+
+        <main>
+            <p class="instructions" id="instructions">✉️ Put your valentine in the envelope and drop it in! ✉️</p>
+            
+            <div id="slots" class="slots-grid">
+                <!-- Slots will be populated by JavaScript -->
+            </div>
+        </main>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Valentine's Vending Machine - Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --pink: #ff6b9d;
+            --pink-dark: #e91e63;
+            --pink-light: #ffc1d4;
+            --red: #e53935;
+            --red-deep: #c62828;
+            --white: #ffffff;
+            --gold: #ffd700;
+            --heart-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
+        }
+
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #ff9a9e 0%, #fecfef 40%, #ffeef4 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Floating hearts background */
+        .hearts-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .floating-heart {
+            position: absolute;
+            opacity: 0.35;
+            z-index: 0;
+            animation: float-up 12s linear forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.35;
+            }
+            90% {
+                opacity: 0.35;
+            }
+            100% {
+                transform: translateY(-50px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Portrait mode simulation - resize browser to ~480x800 */
+        .container {
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 20px);
+        }
+        
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        header {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--white);
+            text-shadow: 
+                3px 3px 0 var(--pink-dark),
+                -1px -1px 0 var(--pink-dark),
+                1px -1px 0 var(--pink-dark),
+                -1px 1px 0 var(--pink-dark),
+                0 0 30px rgba(255, 255, 255, 0.5);
+            margin-bottom: 25px;
+            animation: title-glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes title-glow {
+            from { text-shadow: 
+                3px 3px 0 var(--pink-dark),
+                -1px -1px 0 var(--pink-dark),
+                1px -1px 0 var(--pink-dark),
+                -1px 1px 0 var(--pink-dark),
+                0 0 20px rgba(255, 255, 255, 0.3);
+            }
+            to { text-shadow: 
+                3px 3px 0 var(--pink-dark),
+                -1px -1px 0 var(--pink-dark),
+                1px -1px 0 var(--pink-dark),
+                -1px 1px 0 var(--pink-dark),
+                0 0 40px rgba(255, 255, 255, 0.8),
+                0 0 60px rgba(255, 107, 157, 0.5);
+            }
+        }
+
+        .credits-display {
+            background: linear-gradient(145deg, #ffffff, #ffe0eb);
+            border-radius: 40px;
+            padding: 10px 55px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 
+                0 8px 30px rgba(233, 30, 99, 0.3),
+                inset 0 -3px 10px rgba(255, 107, 157, 0.2);
+            border: 3px solid var(--pink);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .credits-display::before {
+            content: '💖';
+            position: absolute;
+            left: 12px;
+            font-size: 1rem;
+            animation: heart-beat 1s ease-in-out infinite;
+        }
+
+        .credits-display::after {
+            content: '💖';
+            position: absolute;
+            right: 12px;
+            font-size: 1rem;
+            animation: heart-beat 1s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes heart-beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .credits-label {
+            font-size: 1rem;
+            color: var(--pink-dark);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .credits-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--red-deep);
+            min-width: 40px;
+            transition: transform 0.3s ease;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .credits-value.pulse {
+            animation: credit-pulse 0.6s ease;
+        }
+
+        @keyframes credit-pulse {
+            0% { transform: scale(1); color: var(--red-deep); }
+            50% { transform: scale(1.5); color: var(--gold); }
+            100% { transform: scale(1); color: var(--red-deep); }
+        }
+
+        .instructions {
+            font-size: 1rem;
+            color: var(--white);
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            padding: 12px 20px;
+            background: linear-gradient(145deg, var(--pink-dark), var(--red-deep));
+            border-radius: 20px;
+            display: inline-block;
+            border: 3px solid var(--white);
+            box-shadow: 
+                0 6px 20px rgba(233, 30, 99, 0.5),
+                inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            animation: instructions-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes instructions-pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 8px 30px rgba(233, 30, 99, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            }
+            50% { 
+                transform: scale(1.03);
+                box-shadow: 0 12px 40px rgba(233, 30, 99, 0.7), inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding: 5px 15px;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .slot-button {
+            background: linear-gradient(145deg, #ff6b9d, #e91e63);
+            border: none;
+            border-radius: 15px;
+            padding: 18px 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 6px 20px rgba(233, 30, 99, 0.4),
+                0 3px 8px rgba(0, 0, 0, 0.2),
+                inset 0 -3px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slot-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: left 0.5s;
+        }
+
+        .slot-button:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .slot-button::after {
+            content: '🍬';
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            font-size: 1rem;
+            filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2));
+        }
+
+        .slot-button:nth-child(1)::after { content: '🍫'; }
+        .slot-button:nth-child(2)::after { content: '🍬'; }
+        .slot-button:nth-child(3)::after { content: '🍭'; }
+        .slot-button:nth-child(4)::after { content: '🧁'; }
+        .slot-button:nth-child(5)::after { content: '🍪'; }
+        .slot-button:nth-child(6)::after { content: '🍩'; }
+
+        .slot-button:hover:not(:disabled) {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 20px 40px rgba(233, 30, 99, 0.5),
+                0 10px 20px rgba(0, 0, 0, 0.2),
+                inset 0 -5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .slot-button:active:not(:disabled) {
+            transform: translateY(-3px) scale(0.98);
+        }
+
+        .slot-button:disabled {
+            background: linear-gradient(145deg, #bbb, #888);
+            cursor: not-allowed;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .slot-button:disabled::after {
+            content: '🔒';
+            filter: grayscale(1);
+        }
+
+        .slot-button.out-of-stock {
+            background: linear-gradient(145deg, #999, #666);
+            opacity: 0.6;
+        }
+
+        .slot-button.out-of-stock::after {
+            content: '❌';
+        }
+
+        .slot-button.dispensing {
+            animation: dispense-shake 0.15s infinite;
+            background: linear-gradient(145deg, #4caf50, #388e3c);
+        }
+
+        .slot-button.dispensing::after {
+            content: '✨';
+            animation: sparkle 0.3s infinite alternate;
+        }
+
+        @keyframes dispense-shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-3px) rotate(-1deg); }
+            75% { transform: translateX(3px) rotate(1deg); }
+        }
+
+        @keyframes sparkle {
+            from { transform: scale(1) rotate(0deg); }
+            to { transform: scale(1.3) rotate(20deg); }
+        }
+
+        .slot-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--white);
+            display: block;
+            text-shadow: 
+                2px 2px 0 rgba(0, 0, 0, 0.2);
+            line-height: 1;
+        }
+
+        .slot-name {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 5px;
+            display: block;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: linear-gradient(145deg, var(--pink-dark), var(--red-deep));
+            color: var(--white);
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            opacity: 0;
+            white-space: nowrap;
+        }
+
+        .status.visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .status.success {
+            background: linear-gradient(145deg, #4caf50, #2e7d32);
+        }
+
+        /* Corner decorations */
+        .corner-decoration {
+            display: none;
+        }
+
+        .corner-decoration.top-left {
+            top: 20px;
+            left: 20px;
+            animation: corner-float 3s ease-in-out infinite;
+        }
+
+        .corner-decoration.top-right {
+            top: 20px;
+            right: 20px;
+            animation: corner-float 3s ease-in-out infinite 0.5s;
+        }
+
+        .corner-decoration.bottom-left {
+            bottom: 20px;
+            left: 20px;
+            animation: corner-float 3s ease-in-out infinite 1s;
+        }
+
+        .corner-decoration.bottom-right {
+            bottom: 20px;
+            right: 20px;
+            animation: corner-float 3s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes corner-float {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-200px) rotate(720deg); opacity: 0; }
+        }
+
+        .confetti {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            animation: confetti 1.5s ease-out forwards;
+            z-index: 1000;
+        }
+
+        /* Demo controls */
+        .demo-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 15px;
+            z-index: 200;
+        }
+
+        .settings-gear {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 200;
+            opacity: 0.3;
+            transition: opacity 0.3s, transform 0.3s;
+            filter: grayscale(1) brightness(10);
+        }
+
+        .settings-gear:hover {
+            opacity: 0.6;
+            transform: rotate(45deg);
+        }
+
+        /* Settings overlay */
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 300;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .settings-overlay.visible {
+            display: flex;
+        }
+
+        .settings-panel {
+            background: linear-gradient(145deg, #ffffff, #ffe0eb);
+            border-radius: 20px;
+            padding: 25px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .settings-panel h2 {
+            color: var(--pink-dark);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .slot-inventory {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 2px solid var(--pink-light);
+        }
+
+        .slot-inventory.depleted {
+            opacity: 0.5;
+            border-color: #ccc;
+        }
+
+        .slot-inventory label {
+            display: block;
+            color: var(--pink-dark);
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .slot-inventory input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid var(--pink-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .slot-inventory input:focus {
+            outline: none;
+            border-color: var(--pink-dark);
+        }
+
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .slot-header span {
+            font-weight: bold;
+            color: var(--pink-dark);
+            font-size: 1.1rem;
+        }
+
+        .quantity-badge {
+            background: var(--pink);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+
+        .quantity-badge.empty {
+            background: #999;
+        }
+
+        .settings-btn {
+            background: linear-gradient(145deg, var(--pink), var(--pink-dark));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .settings-btn:hover {
+            opacity: 0.9;
+        }
+
+        .settings-btn.close {
+            background: linear-gradient(145deg, #666, #444);
+        }
+
+        /* Empty machine overlay */
+        .empty-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #ff9a9e 0%, #fecfef 50%, #ffeef4 100%);
+            z-index: 250;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .empty-overlay.visible {
+            display: flex;
+        }
+
+        .empty-overlay .sad-candy {
+            font-size: 5rem;
+            animation: sad-bounce 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes sad-bounce {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .empty-overlay h2 {
+            font-family: 'Bubblegum Sans', cursive;
+            font-size: 2rem;
+            color: var(--pink-dark);
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0 white;
+        }
+
+        .empty-overlay .find-message {
+            font-size: 1.3rem;
+            color: var(--red-deep);
+            font-weight: 700;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 20px;
+            border: 3px solid var(--pink);
+            animation: pulse-border 1.5s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: var(--pink); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.4); }
+            50% { border-color: var(--red); box-shadow: 0 0 20px 5px rgba(233, 30, 99, 0.3); }
+        }
+
+        .empty-overlay .name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--pink-dark);
+            animation: rainbow-text 2s linear infinite;
+        }
+
+        @keyframes rainbow-text {
+            0% { color: #e91e63; }
+            25% { color: #9c27b0; }
+            50% { color: #f44336; }
+            75% { color: #e91e63; }
+            100% { color: #e91e63; }
+        }
+
+        .empty-overlay .hearts-dance {
+            font-size: 2rem;
+            margin-top: 20px;
+            animation: hearts-float 2s ease-in-out infinite;
+        }
+
+        @keyframes hearts-float {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .demo-controls button {
+            background: var(--pink);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .demo-controls button:hover {
+            background: var(--pink-dark);
+        }
+
+        @media (max-width: 800px) {
+            h1 { font-size: 2rem; }
+            .credits-display { padding: 15px 40px; }
+            .credits-value { font-size: 3rem; }
+            .slot-button { padding: 30px 20px; }
+            .slot-number { font-size: 3rem; }
+            .corner-decoration { font-size: 2.5rem; }
+            .instructions { font-size: 1.2rem; padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating hearts background -->
+    <div class="hearts-bg" id="hearts-bg"></div>
+    
+    <!-- Corner decorations -->
+    <div class="corner-decoration top-left">💕</div>
+    <div class="corner-decoration top-right">💝</div>
+    <div class="corner-decoration bottom-left">💗</div>
+    <div class="corner-decoration bottom-right">💕</div>
+
+    <div class="container">
+        <header>
+            <h1>💘 Valentine's 💘<br>Vending Machine</h1>
+            <div class="credits-display">
+                <span class="credits-label">Credits</span>
+                <span id="credits" class="credits-value">0</span>
+            </div>
+        </header>
+
+        <main>
+            <p class="instructions" id="instructions">✉️ Put your valentine in the envelope! ✉️<br>Drop it in to get a treat!</p>
+            
+            <div id="slots" class="slots-grid">
+                <button class="slot-button" disabled>
+                    <span class="slot-number">1</span>
+                    <span class="slot-name">Slot 1</span>
+                </button>
+                <button class="slot-button" disabled>
+                    <span class="slot-number">2</span>
+                    <span class="slot-name">Slot 2</span>
+                </button>
+                <button class="slot-button" disabled>
+                    <span class="slot-number">3</span>
+                    <span class="slot-name">Slot 3</span>
+                </button>
+                <button class="slot-button" disabled>
+                    <span class="slot-number">4</span>
+                    <span class="slot-name">Slot 4</span>
+                </button>
+                <button class="slot-button" disabled>
+                    <span class="slot-number">5</span>
+                    <span class="slot-name">Slot 5</span>
+                </button>
+                <button class="slot-button" disabled>
+                    <span class="slot-number">6</span>
+                    <span class="slot-name">Slot 6</span>
+                </button>
+            </div>
+        </main>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <!-- Empty machine overlay -->
+    <div class="empty-overlay" id="empty-overlay">
+        <div class="sad-candy">🍬</div>
+        <h2>Oh no! We're all out!</h2>
+        <div class="find-message">
+            Quick! Find<br>
+            <span class="name" onclick="openSettings()" style="cursor: pointer;">✨ Layla Jolley ✨</span><br>
+            and tell her to restock!
+        </div>
+        <div class="hearts-dance">💕 Thank you! 💕</div>
+    </div>
+
+    <!-- Settings gear -->
+    <div class="settings-gear" onclick="openSettings()">⚙️</div>
+
+    <!-- Settings overlay -->
+    <div class="settings-overlay" id="settings-overlay">
+        <div class="settings-panel">
+            <h2>🍬 Inventory Settings</h2>
+            <div id="inventory-list"></div>
+            <button class="settings-btn" onclick="saveSettings()">Save Changes</button>
+            <button class="settings-btn close" onclick="closeSettings()">Close</button>
+        </div>
+    </div>
+
+    <!-- Demo controls for preview -->
+    <div class="demo-controls">
+        <div style="color: white; margin-bottom: 10px; font-size: 0.9rem;">🎮 Demo Controls</div>
+        <button onclick="simulateEnvelope()">📨 Drop Envelope</button>
+    </div>
+
+    <script>
+        let credits = 0;
+        const creditsEl = document.getElementById('credits');
+        const instructionsEl = document.getElementById('instructions');
+        const statusEl = document.getElementById('status');
+        
+        // Inventory system - persists to localStorage
+        const DEFAULT_INVENTORY = [
+            { id: 1, name: 'Slot 1', quantity: 10 },
+            { id: 2, name: 'Slot 2', quantity: 10 },
+            { id: 3, name: 'Slot 3', quantity: 10 },
+            { id: 4, name: 'Slot 4', quantity: 10 },
+            { id: 5, name: 'Slot 5', quantity: 10 },
+            { id: 6, name: 'Slot 6', quantity: 10 }
+        ];
+        
+        function loadInventory() {
+            const saved = localStorage.getItem('valentineInventory');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            return JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+        }
+        
+        function saveInventory(inventory) {
+            localStorage.setItem('valentineInventory', JSON.stringify(inventory));
+            checkIfEmpty();
+        }
+        
+        function checkIfEmpty() {
+            const allEmpty = inventory.every(slot => slot.quantity <= 0);
+            const overlay = document.getElementById('empty-overlay');
+            if (allEmpty) {
+                overlay.classList.add('visible');
+            } else {
+                overlay.classList.remove('visible');
+            }
+        }
+        
+        let inventory = loadInventory();
+        checkIfEmpty();
+        
+        // Settings functions
+        function openSettings() {
+            const pin = prompt('Enter PIN to access settings:');
+            if (pin === '3130') {
+                renderInventorySettings();
+                document.getElementById('settings-overlay').classList.add('visible');
+            } else if (pin !== null) {
+                showStatus('❌ Incorrect PIN', 'error');
+            }
+        }
+        
+        function closeSettings() {
+            document.getElementById('settings-overlay').classList.remove('visible');
+        }
+        
+        function renderInventorySettings() {
+            const list = document.getElementById('inventory-list');
+            list.innerHTML = inventory.map((slot, i) => `
+                <div class="slot-inventory ${slot.quantity <= 0 ? 'depleted' : ''}">
+                    <div class="slot-header">
+                        <span>Slot ${slot.id}</span>
+                        <span class="quantity-badge ${slot.quantity <= 0 ? 'empty' : ''}">${slot.quantity} left</span>
+                    </div>
+                    <label>Name:</label>
+                    <input type="text" id="slot-name-${i}" value="${slot.name}" placeholder="Slot name">
+                    <label>Quantity:</label>
+                    <input type="number" id="slot-qty-${i}" value="${slot.quantity}" min="0" max="999">
+                </div>
+            `).join('');
+        }
+        
+        function saveSettings() {
+            inventory.forEach((slot, i) => {
+                slot.name = document.getElementById(`slot-name-${i}`).value || `Slot ${slot.id}`;
+                slot.quantity = parseInt(document.getElementById(`slot-qty-${i}`).value) || 0;
+            });
+            saveInventory(inventory);
+            renderSlots();
+            closeSettings();
+            showStatus('✅ Settings saved!', 'success');
+        }
+        
+        // Render slots with inventory awareness
+        function renderSlots() {
+            const slotsGrid = document.getElementById('slots');
+            slotsGrid.innerHTML = inventory.map((slot, i) => `
+                <button class="slot-button ${slot.quantity <= 0 ? 'out-of-stock' : ''}" 
+                        ${credits < 1 || slot.quantity <= 0 ? 'disabled' : ''}
+                        onclick="dispenseSlot(${i})">
+                    <span class="slot-number">${slot.id}</span>
+                    <span class="slot-name">${slot.name}</span>
+                </button>
+            `).join('');
+        }
+        
+        function dispenseSlot(index) {
+            if (credits < 1 || inventory[index].quantity <= 0) return;
+            
+            credits--;
+            creditsEl.textContent = credits;
+            inventory[index].quantity--;
+            saveInventory(inventory);
+            
+            const btn = document.querySelectorAll('.slot-button')[index];
+            btn.classList.add('dispensing');
+            showStatus('🎰 Dispensing your treat...', '');
+            
+            const rect = btn.getBoundingClientRect();
+            spawnConfetti(rect.left + rect.width / 2, rect.top);
+            
+            setTimeout(() => {
+                btn.classList.remove('dispensing');
+                showStatus('🎉 Enjoy your candy! 🍬', 'success');
+                renderSlots();
+                updateInstructions();
+            }, 2000);
+        }
+        
+        function updateInstructions() {
+            instructionsEl.innerHTML = credits > 0 
+                ? '💕 Thanks for your valentine! 💕<br>Pick your treat!' 
+                : '✉️ Put your valentine in the envelope! ✉️<br>Drop it in to get a treat!';
+        }
+
+        // Floating hearts - subtle background effect
+        function createFloatingHearts() {
+            const container = document.getElementById('hearts-bg');
+            if (!container) return;
+            
+            const hearts = ['💕', '💖', '💗', '💓', '💝', '❤️'];
+            
+            function spawnHeart() {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDuration = (8 + Math.random() * 6) + 's';
+                heart.style.fontSize = (0.8 + Math.random() * 1) + 'rem';
+                container.appendChild(heart);
+                setTimeout(() => heart.remove(), 14000);
+            }
+            
+            // Spawn initial hearts spread out
+            for (let i = 0; i < 8; i++) {
+                setTimeout(spawnHeart, i * 600);
+            }
+            
+            // Continue spawning
+            setInterval(spawnHeart, 1200);
+        }
+        
+        createFloatingHearts();
+
+        function spawnConfetti(x, y) {
+            const emojis = ['🎉', '✨', '💖', '🍬', '⭐', '💕', '🌟'];
+            for (let i = 0; i < 12; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                confetti.style.left = (x + (Math.random() - 0.5) * 100) + 'px';
+                confetti.style.top = y + 'px';
+                confetti.style.animationDuration = (1 + Math.random() * 0.5) + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 2000);
+            }
+        }
+
+        function showStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = 'status visible';
+            if (type) statusEl.classList.add(type);
+            setTimeout(() => statusEl.classList.remove('visible'), 3500);
+        }
+
+        function simulateEnvelope() {
+            credits++;
+            creditsEl.textContent = credits;
+            creditsEl.classList.add('pulse');
+            setTimeout(() => creditsEl.classList.remove('pulse'), 600);
+            
+            const rect = creditsEl.getBoundingClientRect();
+            spawnConfetti(rect.left + rect.width / 2, rect.top);
+            
+            showStatus('💌 Envelope received! +1 credit! 💌', 'success');
+            renderSlots();
+            updateInstructions();
+        }
+
+        // Initialize
+        renderSlots();
+    </script>
+</body>
+</html>

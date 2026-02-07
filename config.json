@@ -1,0 +1,49 @@
+{
+  "slots": [
+    {
+      "id": 1,
+      "name": "Slot 1",
+      "channel": 0,
+      "spin_duration_ms": 2000,
+      "enabled": true
+    },
+    {
+      "id": 2,
+      "name": "Slot 2",
+      "channel": 1,
+      "spin_duration_ms": 2000,
+      "enabled": true
+    },
+    {
+      "id": 3,
+      "name": "Slot 3",
+      "channel": 2,
+      "spin_duration_ms": 2000,
+      "enabled": true
+    },
+    {
+      "id": 4,
+      "name": "Slot 4",
+      "channel": 3,
+      "spin_duration_ms": 2000,
+      "enabled": false
+    }
+  ],
+  "sensor": {
+    "gpio_pin": 17,
+    "cooldown_ms": 2000
+  },
+  "servo": {
+    "i2c_address": 64,
+    "frequency": 50,
+    "speed": 0.5
+  },
+  "credits": {
+    "per_envelope": 1,
+    "cost_per_dispense": 1
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8000
+  }
+}
