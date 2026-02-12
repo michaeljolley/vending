@@ -19,7 +19,7 @@ cat > ~/.config/autostart/candy-kiosk.desktop << EOF
 [Desktop Entry]
 Type=Application
 Name=Candy Machine Kiosk
-Exec=/bin/bash -c 'sleep 10 && $CHROMIUM_BIN --kiosk --noerrdialogs --disable-infobars --no-first-run --enable-features=OverlayScrollbar --start-fullscreen http://localhost:8000'
+Exec=/bin/bash -c 'sleep 10 && $CHROMIUM_BIN --kiosk --noerrdialogs --disable-infobars --no-first-run --enable-features=OverlayScrollbar --start-fullscreen --password-store=basic --disable-features=LockProfileCookieDatabase http://localhost:8000'
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
