@@ -6,7 +6,7 @@ echo "Setting up kiosk mode for Valentine's Candy Machine..."
 
 # Install required packages (chromium on newer Pi OS, chromium-browser on older)
 sudo apt-get update
-sudo apt-get install -y chromium unclutter || sudo apt-get install -y chromium-browser unclutter
+sudo apt-get install -y chromium unclutter fonts-noto-color-emoji || sudo apt-get install -y chromium-browser unclutter fonts-noto-color-emoji
 
 # Create autostart directory if it doesn't exist
 mkdir -p ~/.config/autostart
@@ -41,9 +41,14 @@ if ! grep -q "xserver-command=X -s 0 -dpms" /etc/lightdm/lightdm.conf 2>/dev/nul
     sudo sed -i 's/\[Seat:\*\]/[Seat:*]\nxserver-command=X -s 0 -dpms/' /etc/lightdm/lightdm.conf 2>/dev/null || true
 fi
 
+# Configure display rotation for vertical mode (optional - uncomment if needed)
+# echo "display_rotate=1" | sudo tee -a /boot/config.txt
+
 echo ""
 echo "Kiosk mode configured!"
 echo "The browser will auto-start in fullscreen mode on boot."
 echo "Press Alt+F4 to exit kiosk mode if needed."
+echo ""
+echo "To rotate display to vertical, add 'display_rotate=1' to /boot/config.txt"
 echo ""
 echo "Reboot to test the kiosk setup."
