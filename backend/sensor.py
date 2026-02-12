@@ -63,9 +63,10 @@ class BreakBeamSensor:
     def start(self):
         """Start monitoring the sensor."""
         self._running = True
+        self._polling = False
         
         if PI_AVAILABLE:
-            # Use edge detection for instant response
+            # Try edge detection first (instant response)
             try:
                 GPIO.add_event_detect(
                     self.gpio_pin,
@@ -76,17 +77,39 @@ class BreakBeamSensor:
                 print("Sensor monitoring started (GPIO interrupt)")
             except RuntimeError as e:
                 print(f"Warning: Could not set up GPIO edge detection: {e}")
-                print("Sensor will run in polling mode or use /api/simulate-envelope")
-                # Continue without edge detection - can still use simulate endpoint
+                print("Falling back to polling mode...")
+                self._polling = True
+                self._start_polling()
         else:
             print("Sensor monitoring started (simulation mode)")
+    
+    def _start_polling(self):
+        """Start polling the sensor in a background thread."""
+        import threading
+        
+        def poll_loop():
+            last_state = GPIO.input(self.gpio_pin)
+            while self._running:
+                current_state = GPIO.input(self.gpio_pin)
+                # Detect falling edge (HIGH to LOW = beam broken)
+                if last_state == 1 and current_state == 0:
+                    self._handle_beam_break(self.gpio_pin)
+                last_state = current_state
+                time.sleep(0.05)  # Poll every 50ms
+        
+        self._poll_thread = threading.Thread(target=poll_loop, daemon=True)
+        self._poll_thread.start()
+        print("Sensor monitoring started (polling mode)")
     
     def stop(self):
         """Stop monitoring the sensor."""
         self._running = False
         
-        if PI_AVAILABLE:
-            GPIO.remove_event_detect(self.gpio_pin)
+        if PI_AVAILABLE and not getattr(self, '_polling', False):
+            try:
+                GPIO.remove_event_detect(self.gpio_pin)
+            except Exception:
+                pass
         print("Sensor monitoring stopped")
     
     def cleanup(self):
