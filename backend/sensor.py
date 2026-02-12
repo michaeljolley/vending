@@ -66,13 +66,18 @@ class BreakBeamSensor:
         
         if PI_AVAILABLE:
             # Use edge detection for instant response
-            GPIO.add_event_detect(
-                self.gpio_pin,
-                GPIO.FALLING,  # Beam broken = signal goes LOW
-                callback=self._handle_beam_break,
-                bouncetime=200  # Debounce
-            )
-            print("Sensor monitoring started (GPIO interrupt)")
+            try:
+                GPIO.add_event_detect(
+                    self.gpio_pin,
+                    GPIO.FALLING,  # Beam broken = signal goes LOW
+                    callback=self._handle_beam_break,
+                    bouncetime=200  # Debounce
+                )
+                print("Sensor monitoring started (GPIO interrupt)")
+            except RuntimeError as e:
+                print(f"Warning: Could not set up GPIO edge detection: {e}")
+                print("Sensor will run in polling mode or use /api/simulate-envelope")
+                # Continue without edge detection - can still use simulate endpoint
         else:
             print("Sensor monitoring started (simulation mode)")
     
