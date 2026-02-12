@@ -4,19 +4,22 @@
 
 echo "Setting up kiosk mode for Valentine's Candy Machine..."
 
-# Install required packages
+# Install required packages (chromium on newer Pi OS, chromium-browser on older)
 sudo apt-get update
-sudo apt-get install -y chromium-browser unclutter
+sudo apt-get install -y chromium unclutter || sudo apt-get install -y chromium-browser unclutter
 
 # Create autostart directory if it doesn't exist
 mkdir -p ~/.config/autostart
 
+# Detect which chromium binary is available
+CHROMIUM_BIN=$(which chromium || which chromium-browser)
+
 # Create autostart entry for Chromium in kiosk mode
-cat > ~/.config/autostart/candy-kiosk.desktop << 'EOF'
+cat > ~/.config/autostart/candy-kiosk.desktop << EOF
 [Desktop Entry]
 Type=Application
 Name=Candy Machine Kiosk
-Exec=/bin/bash -c 'sleep 10 && chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run --enable-features=OverlayScrollbar --start-fullscreen http://localhost:8000'
+Exec=/bin/bash -c 'sleep 10 && $CHROMIUM_BIN --kiosk --noerrdialogs --disable-infobars --no-first-run --enable-features=OverlayScrollbar --start-fullscreen http://localhost:8000'
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
