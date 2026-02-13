@@ -25,19 +25,30 @@ class CreditManager:
     def __init__(self):
         self.credits = 0
         self.websockets: Set[WebSocket] = set()
+        self._loop = None
+    
+    def set_event_loop(self, loop):
+        self._loop = loop
     
     def add_credits(self, amount: int = 1):
         self.credits += amount
         print(f"Credits added: {amount}. Total: {self.credits}")
-        asyncio.create_task(self.broadcast_state())
+        self._schedule_broadcast()
     
     def spend_credits(self, amount: int = 1) -> bool:
         if self.credits >= amount:
             self.credits -= amount
             print(f"Credits spent: {amount}. Remaining: {self.credits}")
-            asyncio.create_task(self.broadcast_state())
+            self._schedule_broadcast()
             return True
         return False
+    
+    def _schedule_broadcast(self):
+        """Schedule broadcast on the main event loop (thread-safe)."""
+        if self._loop:
+            self._loop.call_soon_threadsafe(
+                lambda: asyncio.create_task(self.broadcast_state())
+            )
     
     def get_credits(self) -> int:
         return self.credits
@@ -84,6 +95,8 @@ def on_envelope_detected():
 async def lifespan(app: FastAPI):
     # Startup
     print("Starting Valentine's Candy Machine...")
+    # Set event loop for thread-safe callbacks
+    credit_manager.set_event_loop(asyncio.get_running_loop())
     sensor = init_sensor(on_trigger=on_envelope_detected)
     sensor.start()
     yield
